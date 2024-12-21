@@ -1,8 +1,9 @@
 const express = require("express")
-
+const connectDB = require("./config/database.js")
+const User = require("./models/user.js")
 const app = express()
 
-const {authAdmin,authUser  } = require("./middlewares/auth.js")
+const {authUser , authAdmin  } = require("./middlewares/auth.js")
 
 app.use("/admin/getAllData" , authAdmin , (req,res) => {
     res.send('Admin Data')
@@ -56,11 +57,31 @@ app.use("/hello" , (req,res) =>{
     res.send("Hello Again")
 }) 
 
-app.use( (req,res) =>{
-    res.send("Hello Dashboard")
+// app.use( (req,res) =>{
+//     res.send("Hello Dashboard")
+// })
+
+app.post("/signUp" , async (req,res) => {
+    const user = new User ({
+        firstName: "MS" ,
+        lastName: "DHoni" ,
+        emailId: "msDhoni@gmail.com",
+        password: "msd@123"
+        })
+
+        try{
+            await user.save()
+            res.send("User Added Successfully")
+        }catch{
+            res.status(400).send("Error while signUp" +err.message)
+        }
 })
 
 
+connectDB().then(() => {
+    console.log("Database connected Successfully")
+    app.listen(8000 , () => console.log('Welcome to 8000'))
+}).catch(() => {
+    console.log("Database connection Error")
+})
 
-
-app.listen(8000 , () => console.log('Welcome to 8000'))
