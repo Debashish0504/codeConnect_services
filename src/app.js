@@ -5,6 +5,8 @@ const app = express()
 
 const {authUser , authAdmin  } = require("./middlewares/auth.js")
 
+app.use(express.json())
+
 app.use("/admin/getAllData" , authAdmin , (req,res) => {
     res.send('Admin Data')
 })
@@ -19,55 +21,8 @@ app.use("/user/getAllData" , authUser , (req,res) => {
 
 
 
-app.use("/user" , (req, res,next) => {
-    console.log('Handle 1st route')
-    //res.send("Handle 1st route")
-    next()
-    console.log('Handle 1st route again')
-},(req, res,next) => {
-    console.log('Handle 2nd route')
-    //res.send("Handle 2nd route")
-    next()
-    console.log('Handle 2nd route again')
-},(req, res,next) => {
-    console.log('Handle 3rd route')
-    res.send("Handle 3rd route")
-    //next()
-},
-)
-
-
-app.get("/user" , (req,res) =>{
-    res.send({ "firstName" : "Debashish" , "lastName" : "Panigrahi"})
-}) 
-
-app.post("/user" , (req,res) =>{
-    res.send("Data Added Successfully")
-}) 
-
-app.delete("/user" , (req,res) =>{
-    res.send("User Deleted Successfully")
-}) 
-
-app.use("/test" , (req,res) =>{
-    res.send("Hello test Again")
-}) 
-
-app.use("/hello" , (req,res) =>{
-    res.send("Hello Again")
-}) 
-
-// app.use( (req,res) =>{
-//     res.send("Hello Dashboard")
-// })
-
 app.post("/signUp" , async (req,res) => {
-    const user = new User ({
-        firstName: "MS" ,
-        lastName: "DHoni" ,
-        emailId: "msDhoni@gmail.com",
-        password: "msd@123"
-        })
+    const user = new User (req.body)
 
         try{
             await user.save()
@@ -75,6 +30,28 @@ app.post("/signUp" , async (req,res) => {
         }catch{
             res.status(400).send("Error while signUp" +err.message)
         }
+})
+
+app.get("/user" , async (req,res) => {
+    const email = req.body.emailId
+    const user = await User.findOne({emailId : email})
+    if(!user){
+        res.status(404).send("User not found")
+    }else{
+        res.send(user)
+    }
+
+})
+
+app.get("/feed" , async (req,res) => {
+    const email = req.body.emailId
+    const user = await User.find()
+    if(user.length === 0){
+        res.status(404).send("User not found")
+    }else{
+        res.send(user)
+    }
+
 })
 
 
