@@ -2,6 +2,21 @@ const express = require("express")
 
 const app = express()
 
+const {authAdmin,authUser  } = require("./middlewares/auth.js")
+
+app.use("/admin/getAllData" , authAdmin , (req,res) => {
+    res.send('Admin Data')
+})
+
+app.use("/user/login" ,  (req,res) => {
+    res.send('User LoggedIn Successfully')
+})
+
+app.use("/user/getAllData" , authUser , (req,res) => {
+    res.send('User Data')
+})
+
+
 
 app.use("/user" , (req, res,next) => {
     console.log('Handle 1st route')
