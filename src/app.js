@@ -23,11 +23,11 @@ app.use("/user/getAllData" , authUser , (req,res) => {
 
 app.post("/signUp" , async (req,res) => {
     const user = new User (req.body)
-
+    console.log('Welcome to body' +req.body.lastName)
         try{
             await user.save()
             res.send("User Added Successfully")
-        }catch{
+        }catch(err){
             res.status(400).send("Error while signUp" +err.message)
         }
 })
@@ -52,6 +52,32 @@ app.get("/feed" , async (req,res) => {
         res.send(user)
     }
 
+})
+
+app.delete("/user"  , async (req,res) => {
+    const id = req.body.userId 
+    try{
+        const user = await User.findByIdAndDelete(id)
+        if(!user){
+            res.status(404).send("User not found")
+        }
+        res.send("User deleted Successfully")
+    }catch{
+        res.status(404).send("Something Went Wrong")
+    }
+})
+
+app.patch("/user" , async (req , res) => {
+    const id = req.body.userId
+    const data = req.body
+    try{
+        const user = await User.findByIdAndUpdate(id , data , {
+            runValidators : true
+        })
+        res.send("User updated Successfully")
+    }catch (err){
+        res.status(404).send("Update failed" + err.message)
+    }
 })
 
 
