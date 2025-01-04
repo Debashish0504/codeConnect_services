@@ -3,11 +3,13 @@ const connectDB = require("./config/database.js")
 const User = require("./models/user.js")
 const bcrypt = require("bcrypt")
 const app = express()
+const cookieParser = require("cookie-parser")
 const {validateSignUpData} = require("./utils/validation.js")
 
 const {authUser , authAdmin  } = require("./middlewares/auth.js")
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.use("/admin/getAllData" , authAdmin , (req,res) => {
     res.send('Admin Data')
@@ -19,6 +21,14 @@ app.use("/user/login" ,  (req,res) => {
 
 app.use("/user/getAllData" , authUser , (req,res) => {
     res.send('User Data')
+})
+
+app.get("/profile" , async (req,res) => {
+    const cookies = req.cookies
+
+    const {token} = cookies
+    console.log(cookies)
+    res.send("Read cookie")
 })
 
 app.post("/login" , async(req,res) => {
@@ -35,6 +45,7 @@ app.post("/login" , async(req,res) => {
 
         const isPasswordValid = await bcrypt.compare(password , user.password)
         if(isPasswordValid){
+            res.cookie("token" , "qwertyuiopasfdfghjklzxvbmm")
             res.send("Login Successful")
         }else{
             throw new Error("Password doesnot exist")
