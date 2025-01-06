@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt")
 const app = express()
 const cookieParser = require("cookie-parser")
 const {validateSignUpData} = require("./utils/validation.js")
-
+const jwt = require("jsonwebtoken")
 const {authUser , authAdmin  } = require("./middlewares/auth.js")
 
 app.use(express.json())
@@ -23,12 +23,28 @@ app.use("/user/getAllData" , authUser , (req,res) => {
     res.send('User Data')
 })
 
-app.get("/profile" , async (req,res) => {
-    const cookies = req.cookies
+app.get("/profile" ,authUser, async (req,res) => {
+    
+    try{
+    
+            const user = req.user
+            
+            res.send(user)
+        }catch(err){
+            res.status(400).send("Error while login" +err.message)
+        }
+})
 
-    const {token} = cookies
-    console.log(cookies)
-    res.send("Read cookie")
+app.post("/sendConnectionRequest" ,authUser, async (req,res) => {
+    
+    try{
+    
+            const user = req.user
+            
+            res.send(user.firstName + " sent request")
+        }catch(err){
+            res.status(400).send("Error while login" +err.message)
+        }
 })
 
 app.post("/login" , async(req,res) => {
@@ -45,7 +61,9 @@ app.post("/login" , async(req,res) => {
 
         const isPasswordValid = await bcrypt.compare(password , user.password)
         if(isPasswordValid){
-            res.cookie("token" , "qwertyuiopasfdfghjklzxvbmm")
+            const token = await jwt.sign({_id : user._id}, "Dev@Tinder$" )
+            console.log(token)
+            res.cookie("token" , token)
             res.send("Login Successful")
         }else{
             throw new Error("Password doesnot exist")
@@ -84,7 +102,7 @@ app.get("/user" , async (req,res) => {
 
 })
 
-app.get("/feed" , async (req,res) => {
+app.get("/feed" , authUser, async (req,res) => {
     const email = req.body.emailId
     const user = await User.find()
     if(user.length === 0){
