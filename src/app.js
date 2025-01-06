@@ -59,9 +59,9 @@ app.post("/login" , async(req,res) => {
             throw new Error("Email ID doesnot exist")
         }
 
-        const isPasswordValid = await bcrypt.compare(password , user.password)
+        const isPasswordValid = await user.validatePassword(password)
         if(isPasswordValid){
-            const token = await jwt.sign({_id : user._id}, "Dev@Tinder$" )
+            const token = await user.getJWT()
             console.log(token)
             res.cookie("token" , token)
             res.send("Login Successful")
