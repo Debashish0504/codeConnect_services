@@ -1,6 +1,7 @@
 const express = require("express")
 const {authUser   } = require("../middlewares/auth.js")
-const {validateEditProfileData} = require("../utils/validation.js")
+const {validateEditProfileData, validUpdatePassword , validCurrentPassword , validNewPassword} = require("../utils/validation.js")
+const bcrypt = require("bcrypt")
 
 const profileRouter = express.Router()
 
@@ -33,6 +34,35 @@ profileRouter.patch("/profile/edit" , authUser , async (req,res) => {
 
     }catch(err){
         res.status(400).send("Error while edit" +err.message)
+    }
+})
+
+profileRouter.patch("/profile/password" , authUser , async(req ,res) => {
+    try{
+
+        console.log(req.body)
+        if(!validUpdatePassword(req)){
+            throw new Error("Invalid Update request")
+        }
+
+        const logginUser = req.user
+
+        if(!await validCurrentPassword(req, logginUser)){
+            throw new Error("Current password doesnot match")
+        }
+
+        if(await validNewPassword(req , logginUser)){
+            throw new Error("New password should not be same as old")
+        }
+        logginUser['password'] = await bcrypt.hash(req.body.confirmPassword , 10)
+
+        await logginUser.save()
+
+        res.json({message : `${logginUser.firstName} , your password updated successfully` , data : logginUser })
+
+        
+    }catch(err){
+        res.status(400).send("Error while update password" +err.message)
     }
 })
 
