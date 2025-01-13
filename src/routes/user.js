@@ -2,6 +2,7 @@ const express = require("express")
 const userRouter = express.Router()
 
 const ConnectionRequestModel = require("../models/connectionRequest")
+const User = require("../models/user")
 const {authUser } = require ("../middlewares/auth")
 
 const USER_SAFE_DATA = ["firstName" , "emailId"]
@@ -56,6 +57,40 @@ userRouter.get("/user/connections" , authUser , async (req,res) => {
 
     }catch(err){
         res.status(400).send("Error while request receive " + err.message )
+    }
+})
+
+userRouter.get("/feed" , authUser , async (req,res) => {
+    try{
+
+        const logginUser = req.user
+
+        const connectionRequest = await ConnectionRequestModel.find({
+            $or : [
+                {fromUserId : logginUser._id},
+                {toUserId : logginUser._id}
+            ]
+        })
+
+        const hideUserInFeed = new Set()
+
+        connectionRequest.forEach((req) => {
+            hideUserInFeed.add(req.fromUserId.toString())
+            hideUserInFeed.add(req.toUserId.toString())
+        });
+
+        const users = await User.find({
+            $and: [
+                {_id : {$nin : Array.from(hideUserInFeed)}},
+                {_id : {$ne : logginUser._id}}
+            ]
+        }).select(USER_SAFE_DATA)
+
+        res.send(users)
+
+
+    }catch(err){
+        res.status(400).send("Error in feed" +err.message)
     }
 })
 

@@ -35,11 +35,11 @@ authRouter.post("/login" , async(req,res) => {
 authRouter.post("/signUp" , async (req,res) => {
     try{
         validateSignUpData(req)
-        const {firstName , lastName , emailId , password} = req.body
+        const {firstName , lastName , emailId , password , age , gender} = req.body
         const passwordHash = await bcrypt.hash(password,10)
         console.log(passwordHash)
         const user = new User ({
-            firstName , lastName , emailId , password : passwordHash
+            firstName , lastName , emailId , password : passwordHash , age , gender
         })
        
             await user.save()
