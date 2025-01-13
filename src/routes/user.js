@@ -64,6 +64,10 @@ userRouter.get("/feed" , authUser , async (req,res) => {
     try{
 
         const logginUser = req.user
+        const pages = parseInt(req.query.pages) || 1
+        let limit = parseInt(req.query.limit) || 10
+        //limit = limit > 50 ? 50 : 10
+        const skip = (pages - 1) * limit
 
         const connectionRequest = await ConnectionRequestModel.find({
             $or : [
@@ -84,7 +88,10 @@ userRouter.get("/feed" , authUser , async (req,res) => {
                 {_id : {$nin : Array.from(hideUserInFeed)}},
                 {_id : {$ne : logginUser._id}}
             ]
-        }).select(USER_SAFE_DATA)
+        })
+        .select(USER_SAFE_DATA)
+        .skip(skip)
+        .limit(limit)
 
         res.send(users)
 
