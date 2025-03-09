@@ -5,7 +5,7 @@ const ConnectionRequestModel = require("../models/connectionRequest")
 const User = require("../models/user")
 const {authUser } = require ("../middlewares/auth")
 
-const USER_SAFE_DATA = ["firstName" , "emailId"]
+const USER_SAFE_DATA = ["firstName" ,"lasttName", "emailId"]
 
 userRouter.get("/user/request/received" , authUser , async(req , res) =>{
 
@@ -21,7 +21,7 @@ userRouter.get("/user/request/received" , authUser , async(req , res) =>{
         if(!connectionRequest){
             return res.status(400).send('No Connection Request')
         }
-
+        console.log(connectionRequest)
         res.json({
             message : 'Connection Fetch Successfully',
             data : connectionRequest
@@ -31,6 +31,7 @@ userRouter.get("/user/request/received" , authUser , async(req , res) =>{
         res.status(400).send("Error while request receive " + err.message )
     }
 })
+
 
 userRouter.get("/user/connections" , authUser , async (req,res) => {
     try{
@@ -50,7 +51,6 @@ userRouter.get("/user/connections" , authUser , async (req,res) => {
             }
             return row.fromUserId
         })
-
         res.json({message: `Connection Fetch Successfully` ,
         data : data
     })
