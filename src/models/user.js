@@ -31,6 +31,13 @@ const userSchema = mongoose.Schema({
         type : Number
 
     },
+    isPremium : {
+        type : Boolean,
+        default : false
+    },
+    membershipType: {
+        type: String,
+    },
     gender : {
         type : String,
         validate(value){
