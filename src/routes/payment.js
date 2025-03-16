@@ -64,11 +64,12 @@ paymentRouter.post('/payment/webhook' , async(req,res) => {
 
         const user = await User.findOne({_id : payment.userId})
         console.log('payment details',paymentDetails.status == 'captured')
-        //if(paymentDetails.status == 'captured'){
+        if(paymentDetails.status == 'captured'){
             user.isPremium = true
             user.membershipType = payment.notes.membershipType
-        //}
-        await user.save()
+            await user.save()
+        }
+        
         
         return res.status(200).json({ msg: "Webhook received successfully" });
 
