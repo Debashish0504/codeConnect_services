@@ -63,7 +63,6 @@ paymentRouter.post('/payment/webhook' , async(req,res) => {
         await payment.save()
 
         const user = await User.findOne({_id : payment.userId})
-        console.log('payment details',paymentDetails.status == 'captured')
         if(paymentDetails.status == 'captured'){
             user.isPremium = true
             user.membershipType = payment.notes.membershipType
@@ -79,6 +78,18 @@ paymentRouter.post('/payment/webhook' , async(req,res) => {
     }
 
    
+})
+
+paymentRouter.get('/premium/verify' , authUser ,async(req,res) => {
+    try{
+        const user = req.user.toJSON()
+        if(user.isPremium){
+            return res.json({isPremium : true})
+        }
+        return res.json({isPremium : false})
+    }catch(error){
+        return res.status(500).json({message : error.message})
+    }
 })
 
 module.exports = paymentRouter
